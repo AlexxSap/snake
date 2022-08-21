@@ -28,6 +28,9 @@ func (snk Snake) Eat(food Point) {
 func (snk Snake) Head() Point {
 	return snk.body[0]
 }
+func (snk Snake) Body() []Point {
+	return snk.body[1:]
+}
 
 func (snk Snake) Len() int {
 	return len(snk.body)
@@ -52,4 +55,14 @@ func (snk Snake) Move(dir Direction) {
 	for i := 1; i < snk.Len(); i++ {
 		snk.body[i], prev = prev, snk.body[i]
 	}
+}
+
+func (snk Snake) IsSelfBite() bool {
+	h := snk.Head()
+	for _, p := range snk.Body() {
+		if p == h {
+			return true
+		}
+	}
+	return false
 }
