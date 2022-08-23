@@ -1,7 +1,7 @@
 package main
 
 type Point struct {
-	X, Y uint8
+	X, Y int
 }
 
 type Direction uint8
@@ -23,6 +23,10 @@ func NewSnake(startPoint Point) Snake {
 
 func (snk Snake) Eat(food Point) {
 	snk.body = append([]Point{food}, snk.body...)
+}
+
+func (snk Snake) Points() []Point {
+	return snk.body
 }
 
 func (snk Snake) Head() Point {
