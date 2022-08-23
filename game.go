@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	sdc "github.com/AlexxSap/SiDCo"
 )
 
@@ -8,6 +10,7 @@ type Game struct {
 	snakeField sdc.Canvas
 	dataField  sdc.Canvas
 	snake      Snake
+	speed      int
 }
 
 func NewGame() Game {
@@ -17,6 +20,7 @@ func NewGame() Game {
 		snakeField: snake,
 		dataField:  data,
 		snake:      NewSnake(Point{5, 5}),
+		speed:      500,
 	}
 }
 
@@ -40,15 +44,30 @@ func convertPoints(points []Point) []sdc.Point {
 
 func repaintSnake(cnv sdc.Canvas, snake Snake) {
 	cnv.ClearInner()
-	cnv.DrawPath("^", convertPoints(snake.Points()))
+	cnv.DrawPath("*", convertPoints([]Point{snake.Head()}))
+	cnv.DrawPath("0", convertPoints(snake.Body()))
 }
 
 func repaintScore(cnv sdc.Canvas, snake Snake) {
 	cnv.ClearInner()
+	cnv.DrawText("Len  : nnn", sdc.Point{2, 2})
+	cnv.DrawText("Speed: nnn", sdc.Point{3, 2})
 }
 
 func (gm Game) Start() {
 	gm.drawBoxes()
 
-	gm.repaint()
+	var globalTimer *time.Timer
+
+	reserGlobalTimer := func() {
+		globalTimer = time.NewTimer(time.Duration(gm.speed) * time.Microsecond)
+	}
+	reserGlobalTimer()
+
+	for {
+		<-globalTimer.C
+
+		gm.repaint()
+	}
+
 }
