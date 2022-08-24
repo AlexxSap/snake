@@ -90,7 +90,7 @@ func repaintScore(cnv sdc.Canvas, snakeLen, speed int) {
 	cnv.DrawText("Speed: "+strconv.Itoa(speed), sdc.Point{3, 2})
 }
 
-func (gm *Game) moveSnake() {
+func (gm *Game) moveSnake(gameOverChanel chan<- bool) {
 
 }
 
@@ -113,14 +113,22 @@ func (gm *Game) generateFood() {
 	}
 }
 
+func (gm *Game) printGameOver() {
+	gm.dataField.DrawText("GAME OVER", sdc.Point{4, 2})
+}
+
 func (gm *Game) Start() {
+
+	var gameOverChanel chan bool = make(chan bool)
 	gm.drawBoxes()
 
-	//go gm.moveSnake()
+	go gm.moveSnake(gameOverChanel)
 	go gm.generateFood()
-
 	go gm.repaint()
 
-	/// TODO добавить канал на завершение игры
-	time.Sleep(5 * time.Second)
+	<-gameOverChanel
+
+	time.Sleep(1 * time.Second)
+	gm.printGameOver()
+
 }
