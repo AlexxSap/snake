@@ -36,6 +36,15 @@ func (snk Snake) Body() []Point {
 	return snk.body[1:]
 }
 
+func (snk Snake) IsSnakePoint(p Point) bool {
+	for _, s := range snk.body {
+		if s == p {
+			return true
+		}
+	}
+	return false
+}
+
 func (snk Snake) Len() int {
 	return len(snk.body)
 }

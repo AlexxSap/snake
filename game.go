@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math/rand"
 	"strconv"
 	"time"
 
@@ -13,12 +14,13 @@ type Game struct {
 	snake      Snake
 	speed      int
 	isOver     bool
+	food       []Point
 }
 
-func SnakeGame() Game {
+func SnakeGame() *Game {
 	snakeCanvas, _ := sdc.NewCanvas(sdc.Point{1, 1}, sdc.Point{20, 30})
 	dataCanvas, _ := sdc.NewCanvas(sdc.Point{1, 35}, sdc.Point{10, 20})
-	return Game{
+	return &Game{
 		snakeField: snakeCanvas,
 		dataField:  dataCanvas,
 		snake:      NewSnake(Point{5, 5}),
@@ -26,13 +28,22 @@ func SnakeGame() Game {
 		isOver:     false,
 	}
 }
+func (gm *Game) addRandomFood() {
+	for {
+		p := Point{rand.Intn(gm.snakeField.Size().Column-1) + 1, rand.Intn(gm.snakeField.Size().Line-1) + 1}
+		if !gm.snake.IsSnakePoint(p) {
+			gm.food = append(gm.food, p)
+			break
+		}
+	}
+}
 
-func (gm Game) drawBoxes() {
+func (gm *Game) drawBoxes() {
 	gm.snakeField.DrawBoxWithTitle("SNAKE GAME")
 	gm.dataField.DrawBoxWithTitle("SCORE")
 }
 
-func (gm Game) repaint() {
+func (gm *Game) repaint() {
 	var repaintTimer *time.Timer
 
 	resetRepaintTimer := func() {
@@ -41,7 +52,11 @@ func (gm Game) repaint() {
 	resetRepaintTimer()
 
 	for {
+		gm.snakeField.ClearInner()
+		gm.dataField.ClearInner()
+
 		repaintSnake(gm.snakeField, gm.snake)
+		repaintFood(gm.snakeField, gm.food)
 		repaintScore(gm.dataField, gm.snake.Len(), gm.speed)
 
 		if gm.isOver {
@@ -62,30 +77,50 @@ func convertPoints(points []Point) []sdc.Point {
 }
 
 func repaintSnake(cnv sdc.Canvas, snake Snake) {
-	cnv.ClearInner()
 	cnv.DrawPath("*", convertPoints([]Point{snake.Head()}))
 	cnv.DrawPath("0", convertPoints(snake.Body()))
 }
 
+func repaintFood(cnv sdc.Canvas, food []Point) {
+	cnv.DrawPath("$", convertPoints(food))
+}
+
 func repaintScore(cnv sdc.Canvas, snakeLen, speed int) {
-	cnv.ClearInner()
 	cnv.DrawText("Len  : "+strconv.Itoa(snakeLen), sdc.Point{2, 2})
 	cnv.DrawText("Speed: "+strconv.Itoa(speed), sdc.Point{3, 2})
 }
 
-func (gm Game) moveSnake() {
+func (gm *Game) moveSnake() {
 
 }
 
-func (gm Game) generateFood() {
+func (gm *Game) generateFood() {
+	var foodTimer *time.Timer
 
+	resetFoodTimer := func() {
+		foodTimer = time.NewTimer(2 * time.Duration(gm.speed) * time.Millisecond)
+	}
+	resetFoodTimer()
+
+	for {
+		gm.addRandomFood()
+
+		<-foodTimer.C
+		if gm.isOver {
+			break
+		}
+		resetFoodTimer()
+	}
 }
 
-func (gm Game) Start() {
+func (gm *Game) Start() {
 	gm.drawBoxes()
 
 	//go gm.moveSnake()
-	//go gm.generateFood()
+	go gm.generateFood()
 
-	gm.repaint()
+	go gm.repaint()
+
+	/// TODO добавить канал на завершение игры
+	time.Sleep(5 * time.Second)
 }
