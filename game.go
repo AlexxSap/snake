@@ -18,8 +18,8 @@ type Game struct {
 }
 
 func SnakeGame() *Game {
-	snakeCanvas, _ := sdc.NewCanvas(sdc.Point{1, 1}, sdc.Point{20, 30})
-	dataCanvas, _ := sdc.NewCanvas(sdc.Point{1, 35}, sdc.Point{10, 20})
+	snakeCanvas, _ := sdc.NewCanvas(sdc.Point{Line: 1, Column: 1}, sdc.Point{Line: 20, Column: 30})
+	dataCanvas, _ := sdc.NewCanvas(sdc.Point{Line: 1, Column: 35}, sdc.Point{Line: 10, Column: 20})
 	return &Game{
 		snakeField: snakeCanvas,
 		dataField:  dataCanvas,
@@ -86,12 +86,21 @@ func repaintFood(cnv sdc.Canvas, food []Point) {
 }
 
 func repaintScore(cnv sdc.Canvas, snakeLen, speed int) {
-	cnv.DrawText("Len  : "+strconv.Itoa(snakeLen), sdc.Point{2, 2})
-	cnv.DrawText("Speed: "+strconv.Itoa(speed), sdc.Point{3, 2})
+	cnv.DrawText("Len  : "+strconv.Itoa(snakeLen), sdc.Point{Line: 2, Column: 2})
+	cnv.DrawText("Speed: "+strconv.Itoa(speed), sdc.Point{Line: 3, Column: 2})
 }
 
 func (gm *Game) moveSnake(gameOverChanel chan<- bool) {
+	// stub
+	var foodTimer *time.Timer
+	resetFoodTimer := func() {
+		foodTimer = time.NewTimer(10 * time.Duration(gm.speed) * time.Millisecond)
+	}
+	resetFoodTimer()
 
+	<-foodTimer.C
+
+	gameOverChanel <- true
 }
 
 func (gm *Game) generateFood() {
@@ -114,7 +123,7 @@ func (gm *Game) generateFood() {
 }
 
 func (gm *Game) printGameOver() {
-	gm.dataField.DrawText("GAME OVER", sdc.Point{4, 2})
+	gm.dataField.DrawText("<===GAME OVER===>", sdc.Point{Line: 5, Column: 2})
 }
 
 func (gm *Game) Start() {
@@ -127,6 +136,7 @@ func (gm *Game) Start() {
 	go gm.repaint()
 
 	<-gameOverChanel
+	gm.isOver = true
 
 	time.Sleep(1 * time.Second)
 	gm.printGameOver()
