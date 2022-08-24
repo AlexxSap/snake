@@ -76,11 +76,14 @@ func convertPoints(points []Point) []sdc.Point {
 	return result
 }
 
+// TODO make snake green
 func repaintSnake(cnv sdc.Canvas, snake Snake) {
+	//TODO make snake's head painted by diff color?
 	cnv.DrawPath("*", convertPoints([]Point{snake.Head()}))
 	cnv.DrawPath("0", convertPoints(snake.Body()))
 }
 
+// TODO make food yellow
 func repaintFood(cnv sdc.Canvas, food []Point) {
 	cnv.DrawPath("$", convertPoints(food))
 }
