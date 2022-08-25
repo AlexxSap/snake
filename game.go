@@ -132,6 +132,7 @@ func (gm *Game) checkKeyPress() {
 		case keyboard.KeyArrowRight:
 			gm.direction = Right
 		}
+
 	}
 }
 
@@ -156,6 +157,8 @@ func (gm *Game) moveSnake(gameOverChanel chan<- bool) {
 			gameOverChanel <- true
 			break
 		}
+
+		resetMoveTimer()
 	}
 }
 
