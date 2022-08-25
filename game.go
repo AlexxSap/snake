@@ -12,7 +12,7 @@ import (
 type Game struct {
 	snakeField sdc.Canvas
 	dataField  sdc.Canvas
-	snake      Snake
+	snake      *Snake
 	speed      int
 	isOver     bool
 	food       []Point
@@ -26,8 +26,8 @@ func SnakeGame() *Game {
 	return &Game{
 		snakeField: snakeCanvas,
 		dataField:  dataCanvas,
-		snake:      NewSnake([]Point{Point{5, 5}, Point{5, 4}, Point{5, 3}}),
-		speed:      1000,
+		snake:      NewSnake([]Point{Point{5, 5}, Point{4, 5}, Point{3, 5}}),
+		speed:      500,
 		isOver:     false,
 		direction:  Right,
 	}
@@ -49,6 +49,10 @@ func (gm *Game) isFood(point Point) bool {
 		}
 	}
 	return false
+}
+
+func (gm *Game) removeFood(point Point) {
+	// TODO removeFood
 }
 
 func (gm *Game) drawBoxes() {
@@ -90,7 +94,7 @@ func convertPoints(points []Point) []sdc.Point {
 }
 
 // TODO make snake green
-func repaintSnake(cnv sdc.Canvas, snake Snake) {
+func repaintSnake(cnv sdc.Canvas, snake *Snake) {
 	//TODO make snake's head painted by diff color?
 	cnv.DrawPath("*", convertPoints([]Point{snake.Head()}))
 	cnv.DrawPath("0", convertPoints(snake.Body()))
@@ -149,6 +153,7 @@ func (gm *Game) moveSnake(gameOverChanel chan<- bool) {
 		nextPoint := MovePoint(gm.direction, gm.snake.Head())
 		if gm.isFood(nextPoint) {
 			gm.snake.Eat(nextPoint)
+			gm.removeFood(nextPoint)
 		} else {
 			gm.snake.Move(gm.direction)
 		}
@@ -166,7 +171,7 @@ func (gm *Game) generateFood() {
 	var foodTimer *time.Timer
 
 	resetFoodTimer := func() {
-		foodTimer = time.NewTimer(2 * time.Duration(gm.speed) * time.Millisecond)
+		foodTimer = time.NewTimer(10 * time.Duration(gm.speed) * time.Millisecond)
 	}
 	resetFoodTimer()
 

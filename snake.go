@@ -31,27 +31,26 @@ type Snake struct {
 	body []Point
 }
 
-// TODO сделать дэфолтную змейку длиннее
-func NewSnake(startPoints []Point) Snake {
-	return Snake{body: startPoints}
+func NewSnake(startPoints []Point) *Snake {
+	return &Snake{body: startPoints}
 }
 
-func (snk Snake) Eat(food Point) {
+func (snk *Snake) Eat(food Point) {
 	snk.body = append([]Point{food}, snk.body...)
 }
 
-func (snk Snake) Points() []Point {
+func (snk *Snake) Points() []Point {
 	return snk.body
 }
 
-func (snk Snake) Head() Point {
+func (snk *Snake) Head() Point {
 	return snk.body[0]
 }
-func (snk Snake) Body() []Point {
+func (snk *Snake) Body() []Point {
 	return snk.body[1:]
 }
 
-func (snk Snake) IsSnakePoint(p Point) bool {
+func (snk *Snake) IsSnakePoint(p Point) bool {
 	for _, s := range snk.body {
 		if s == p {
 			return true
@@ -60,11 +59,11 @@ func (snk Snake) IsSnakePoint(p Point) bool {
 	return false
 }
 
-func (snk Snake) Len() int {
+func (snk *Snake) Len() int {
 	return len(snk.body)
 }
 
-func (snk Snake) Move(dir Direction) {
+func (snk *Snake) Move(dir Direction) {
 	prev := snk.Head()
 	snk.body[0] = MovePoint(dir, prev)
 
@@ -73,7 +72,7 @@ func (snk Snake) Move(dir Direction) {
 	}
 }
 
-func (snk Snake) IsSelfBite() bool {
+func (snk *Snake) IsSelfBite() bool {
 	h := snk.Head()
 	for _, p := range snk.Body() {
 		if p == h {
