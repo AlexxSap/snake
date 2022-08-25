@@ -13,10 +13,25 @@ const (
 	Right
 )
 
+func MovePoint(dir Direction, prev Point) Point {
+	switch dir {
+	case Up:
+		return Point{prev.X, prev.Y - 1}
+	case Down:
+		return Point{prev.X, prev.Y + 1}
+	case Right:
+		return Point{prev.X + 1, prev.Y}
+	case Left:
+		return Point{prev.X - 1, prev.Y}
+	}
+	return prev
+}
+
 type Snake struct {
 	body []Point
 }
 
+// TODO сделать дэфолтную змейку длиннее
 func NewSnake(startPoint Point) Snake {
 	return Snake{body: []Point{startPoint}}
 }
@@ -51,19 +66,7 @@ func (snk Snake) Len() int {
 
 func (snk Snake) Move(dir Direction) {
 	prev := snk.Head()
-	snk.body[0] = func(dir Direction, prev Point) Point {
-		switch dir {
-		case Up:
-			return Point{prev.X, prev.Y - 1}
-		case Down:
-			return Point{prev.X, prev.Y + 1}
-		case Right:
-			return Point{prev.X + 1, prev.Y}
-		case Left:
-			return Point{prev.X - 1, prev.Y}
-		}
-		return prev
-	}(dir, prev)
+	snk.body[0] = MovePoint(dir, prev)
 
 	for i := 1; i < snk.Len(); i++ {
 		snk.body[i], prev = prev, snk.body[i]

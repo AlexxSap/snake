@@ -41,6 +41,15 @@ func (gm *Game) addRandomFood() {
 	}
 }
 
+func (gm *Game) isFood(point Point) bool {
+	for _, food := range gm.food {
+		if point == food {
+			return true
+		}
+	}
+	return false
+}
+
 func (gm *Game) drawBoxes() {
 	gm.snakeField.DrawBoxWithTitle("SNAKE GAME")
 	gm.dataField.DrawBoxWithTitle("SCORE")
@@ -135,14 +144,18 @@ func (gm *Game) moveSnake(gameOverChanel chan<- bool) {
 	for {
 		<-moveTimer.C
 
-		gm.snake.Move(gm.direction)
+		nextPoint := MovePoint(gm.direction, gm.snake.Head())
+		if gm.isFood(nextPoint) {
+			gm.snake.Eat(nextPoint)
+		} else {
+			gm.snake.Move(gm.direction)
+		}
 
 		if gm.isSnakeDead() {
 			gameOverChanel <- true
 			break
 		}
 	}
-
 }
 
 func (gm *Game) generateFood() {
