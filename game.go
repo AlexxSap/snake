@@ -6,6 +6,7 @@ import (
 	"time"
 
 	sdc "github.com/AlexxSap/SiDCo"
+	"github.com/eiannone/keyboard"
 )
 
 type Game struct {
@@ -15,11 +16,13 @@ type Game struct {
 	speed      int
 	isOver     bool
 	food       []Point
+	direction  Direction
 }
 
 func SnakeGame() *Game {
 	snakeCanvas, _ := sdc.NewCanvas(sdc.Point{Line: 1, Column: 1}, sdc.Point{Line: 20, Column: 30})
 	dataCanvas, _ := sdc.NewCanvas(sdc.Point{Line: 1, Column: 35}, sdc.Point{Line: 10, Column: 20})
+	direction := Right
 	return &Game{
 		snakeField: snakeCanvas,
 		dataField:  dataCanvas,
@@ -93,17 +96,53 @@ func repaintScore(cnv sdc.Canvas, snakeLen, speed int) {
 	cnv.DrawText("Speed: "+strconv.Itoa(speed), sdc.Point{Line: 3, Column: 2})
 }
 
-func (gm *Game) moveSnake(gameOverChanel chan<- bool) {
-	// stub
-	var foodTimer *time.Timer
-	resetFoodTimer := func() {
-		foodTimer = time.NewTimer(10 * time.Duration(gm.speed) * time.Millisecond)
+func (gm *Game) isSnakeDead() bool {
+	// TODO добавить проверку выхода за пределы поля
+	return gm.snake.IsSelfBite()
+}
+
+func (gm *Game) checkKeyPress() {
+	for {
+		if gm.isOver {
+			break
+		}
+
+		_, key, err := keyboard.GetKey()
+		if err != nil {
+			panic(err)
+		}
+
+		switch key {
+		case keyboard.KeyArrowLeft:
+			gm.direction = Left
+		case keyboard.KeyArrowUp:
+			gm.direction = Up
+		case keyboard.KeyArrowDown:
+			gm.direction = Down
+		case keyboard.KeyArrowRight:
+			gm.direction = Right
+		}
 	}
-	resetFoodTimer()
+}
 
-	<-foodTimer.C
+func (gm *Game) moveSnake(gameOverChanel chan<- bool) {
+	var moveTimer *time.Timer
+	resetMoveTimer := func() {
+		moveTimer = time.NewTimer(time.Duration(gm.speed) * time.Millisecond)
+	}
+	resetMoveTimer()
 
-	gameOverChanel <- true
+	for {
+		<-moveTimer.C
+
+		gm.snake.Move(gm.direction)
+
+		if gm.isSnakeDead() {
+			gameOverChanel <- true
+			break
+		}
+	}
+
 }
 
 func (gm *Game) generateFood() {
@@ -131,9 +170,17 @@ func (gm *Game) printGameOver() {
 
 func (gm *Game) Start() {
 
+	if err := keyboard.Open(); err != nil {
+		panic(err)
+	}
+	defer func() {
+		_ = keyboard.Close()
+	}()
+
 	var gameOverChanel chan bool = make(chan bool)
 	gm.drawBoxes()
 
+	go gm.checkKeyPress()
 	go gm.moveSnake(gameOverChanel)
 	go gm.generateFood()
 	go gm.repaint()
