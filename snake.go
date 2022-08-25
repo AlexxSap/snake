@@ -32,8 +32,8 @@ type Snake struct {
 }
 
 // TODO сделать дэфолтную змейку длиннее
-func NewSnake(startPoint Point) Snake {
-	return Snake{body: []Point{startPoint}}
+func NewSnake(startPoints []Point) Snake {
+	return Snake{body: startPoints}
 }
 
 func (snk Snake) Eat(food Point) {

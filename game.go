@@ -22,13 +22,14 @@ type Game struct {
 func SnakeGame() *Game {
 	snakeCanvas, _ := sdc.NewCanvas(sdc.Point{Line: 1, Column: 1}, sdc.Point{Line: 20, Column: 30})
 	dataCanvas, _ := sdc.NewCanvas(sdc.Point{Line: 1, Column: 35}, sdc.Point{Line: 10, Column: 20})
-	direction := Right
+
 	return &Game{
 		snakeField: snakeCanvas,
 		dataField:  dataCanvas,
-		snake:      NewSnake(Point{5, 5}),
+		snake:      NewSnake([]Point{Point{5, 5}, Point{5, 4}, Point{5, 3}}),
 		speed:      1000,
 		isOver:     false,
+		direction:  Right,
 	}
 }
 func (gm *Game) addRandomFood() {
