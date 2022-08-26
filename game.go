@@ -52,7 +52,13 @@ func (gm *Game) isFood(point Point) bool {
 }
 
 func (gm *Game) removeFood(point Point) {
-	// TODO removeFood
+	for i, f := range gm.food {
+		if point == f {
+			newFood := gm.food[:i]
+			newFood = append(newFood, gm.food[i+1:]...)
+			break
+		}
+	}
 }
 
 func (gm *Game) drawBoxes() {
