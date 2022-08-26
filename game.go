@@ -93,14 +93,10 @@ func convertPoints(points []Point) []sdc.Point {
 	return result
 }
 
-// TODO make snake green
 func repaintSnake(cnv sdc.Canvas, snake *Snake) {
-	//TODO make snake's head painted by diff color?
-	cnv.DrawPath("*", convertPoints([]Point{snake.Head()}))
-	cnv.DrawPath("0", convertPoints(snake.Body()))
+	cnv.DrawPath("o", convertPoints(snake.Points()))
 }
 
-// TODO make food yellow
 func repaintFood(cnv sdc.Canvas, food []Point) {
 	cnv.DrawPath("$", convertPoints(food))
 }
@@ -113,7 +109,7 @@ func repaintScore(cnv sdc.Canvas, snakeLen, speed int) {
 func (gm *Game) isSnakeOutOfBox() bool {
 	head := gm.snake.Head()
 	size := gm.snakeField.Size()
-	return head.X < 0 || head.Y < 0 || head.X > size.Column || head.Y > size.Line
+	return head.X < 1 || head.Y < 1 || head.X > size.Column-1 || head.Y > size.Line-1
 }
 
 func (gm *Game) isSnakeDead() bool {
@@ -128,7 +124,7 @@ func (gm *Game) checkKeyPress() {
 
 		_, key, err := keyboard.GetKey()
 		if err != nil {
-			panic(err)
+			break
 		}
 
 		switch key {
