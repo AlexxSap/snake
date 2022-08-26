@@ -133,15 +133,25 @@ func (gm *Game) checkKeyPress() {
 			break
 		}
 
+		prevDir := gm.direction
+
 		switch key {
 		case keyboard.KeyArrowLeft:
-			gm.direction = Left
+			if prevDir != Right {
+				gm.direction = Left
+			}
 		case keyboard.KeyArrowUp:
-			gm.direction = Up
+			if prevDir != Down {
+				gm.direction = Up
+			}
 		case keyboard.KeyArrowDown:
-			gm.direction = Down
+			if prevDir != Up {
+				gm.direction = Down
+			}
 		case keyboard.KeyArrowRight:
-			gm.direction = Right
+			if prevDir != Left {
+				gm.direction = Right
+			}
 		}
 
 	}
