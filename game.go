@@ -123,7 +123,7 @@ func (gm *Game) moveSnake(gameOverChanel chan<- bool) {
 		if gm.isFood(nextPoint) {
 			gm.snake.Eat(nextPoint)
 			gm.removeFood(nextPoint)
-			gm.speed = gm.speed - 20
+			gm.speed = gm.speed - 30
 		} else {
 			gm.snake.Move(gm.direction)
 		}
