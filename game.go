@@ -56,6 +56,7 @@ func (gm *Game) removeFood(point Point) {
 		if point == f {
 			newFood := gm.food[:i]
 			newFood = append(newFood, gm.food[i+1:]...)
+			gm.food = newFood
 			break
 		}
 	}
@@ -171,7 +172,7 @@ func (gm *Game) moveSnake(gameOverChanel chan<- bool) {
 		if gm.isFood(nextPoint) {
 			gm.snake.Eat(nextPoint)
 			gm.removeFood(nextPoint)
-			gm.speed = gm.speed - gm.snake.Len()*20
+			gm.speed = gm.speed - 20
 		} else {
 			gm.snake.Move(gm.direction)
 		}
