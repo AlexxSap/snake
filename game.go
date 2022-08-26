@@ -110,9 +110,14 @@ func repaintScore(cnv sdc.Canvas, snakeLen, speed int) {
 	cnv.DrawText("Speed: "+strconv.Itoa(speed), sdc.Point{Line: 3, Column: 2})
 }
 
+func (gm *Game) isSnakeOutOfBox() bool {
+	head := gm.snake.Head()
+	size := gm.snakeField.Size()
+	return head.X < 0 || head.Y < 0 || head.X > size.Column || head.Y > size.Line
+}
+
 func (gm *Game) isSnakeDead() bool {
-	// TODO добавить проверку выхода за пределы поля
-	return gm.snake.IsSelfBite()
+	return gm.snake.IsSelfBite() || gm.isSnakeOutOfBox()
 }
 
 func (gm *Game) checkKeyPress() {
