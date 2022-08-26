@@ -161,6 +161,7 @@ func (gm *Game) moveSnake(gameOverChanel chan<- bool) {
 		if gm.isFood(nextPoint) {
 			gm.snake.Eat(nextPoint)
 			gm.removeFood(nextPoint)
+			gm.speed = gm.speed - gm.snake.Len()*20
 		} else {
 			gm.snake.Move(gm.direction)
 		}
@@ -178,7 +179,7 @@ func (gm *Game) generateFood() {
 	var foodTimer *time.Timer
 
 	resetFoodTimer := func() {
-		foodTimer = time.NewTimer(10 * time.Duration(gm.speed) * time.Millisecond)
+		foodTimer = time.NewTimer(20 * time.Duration(gm.speed) * time.Millisecond)
 	}
 	resetFoodTimer()
 
