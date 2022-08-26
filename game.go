@@ -1,8 +1,6 @@
 package main
 
 import (
-	"math/rand"
-	"strconv"
 	"time"
 
 	sdc "github.com/AlexxSap/SiDCo"
@@ -32,68 +30,30 @@ func SnakeGame() *Game {
 		direction:  Right,
 	}
 }
-func (gm *Game) addRandomFood() {
-	for {
-		p := Point{rand.Intn(gm.snakeField.Size().Column-1) + 1, rand.Intn(gm.snakeField.Size().Line-1) + 1}
-		if !gm.snake.IsSnakePoint(p) {
-			gm.food = append(gm.food, p)
-			break
-		}
+
+func (gm *Game) Start() {
+
+	if err := keyboard.Open(); err != nil {
+		panic(err)
 	}
-}
+	defer func() {
+		_ = keyboard.Close()
+	}()
 
-func (gm *Game) isFood(point Point) bool {
-	for _, food := range gm.food {
-		if point == food {
-			return true
-		}
-	}
-	return false
-}
+	var gameOverChanel chan bool = make(chan bool)
+	gm.drawBoxes()
 
-func (gm *Game) removeFood(point Point) {
-	for i, f := range gm.food {
-		if point == f {
-			newFood := gm.food[:i]
-			newFood = append(newFood, gm.food[i+1:]...)
-			gm.food = newFood
-			break
-		}
-	}
-}
+	go gm.checkKeyPress()
+	go gm.moveSnake(gameOverChanel)
+	go gm.generateFood()
+	go gm.repaint()
 
-func (gm *Game) drawBoxes() {
-	gm.snakeField.DrawBoxWithTitle("SNAKE GAME")
-	gm.dataField.DrawBoxWithTitle("SCORE")
-}
+	<-gameOverChanel
+	gm.isOver = true
 
-func (gm *Game) repaint() {
-	var repaintTimer *time.Timer
+	time.Sleep(1 * time.Second)
+	gm.printGameOver()
 
-	resetRepaintTimer := func() {
-		repaintTimer = time.NewTimer(time.Duration(gm.speed) * time.Millisecond)
-	}
-	resetRepaintTimer()
-
-	prevSpeed := 0
-	for {
-		gm.snakeField.ClearInner()
-
-		repaintSnake(gm.snakeField, gm.snake)
-		repaintFood(gm.snakeField, gm.food)
-		if prevSpeed != gm.speed {
-			gm.dataField.ClearInner()
-			repaintScore(gm.dataField, gm.snake.Len(), gm.speed)
-			prevSpeed = gm.speed
-		}
-
-		if gm.isOver {
-			break
-		}
-
-		<-repaintTimer.C
-		resetRepaintTimer()
-	}
 }
 
 func convertPoints(points []Point) []sdc.Point {
@@ -102,20 +62,6 @@ func convertPoints(points []Point) []sdc.Point {
 		result = append(result, sdc.Point{Line: int(p.Y), Column: int(p.X)})
 	}
 	return result
-}
-
-func repaintSnake(cnv sdc.Canvas, snake *Snake) {
-	cnv.DrawPath("o", convertPoints(snake.Points()))
-}
-
-func repaintFood(cnv sdc.Canvas, food []Point) {
-	cnv.DrawPath("$", convertPoints(food))
-}
-
-func repaintScore(cnv sdc.Canvas, snakeLen, speed int) {
-
-	cnv.DrawText("Len  : "+strconv.Itoa(snakeLen), sdc.Point{Line: 2, Column: 2})
-	cnv.DrawText("Speed: "+strconv.Itoa(1000-speed), sdc.Point{Line: 3, Column: 2})
 }
 
 func (gm *Game) isSnakeOutOfBox() bool {
@@ -189,52 +135,4 @@ func (gm *Game) moveSnake(gameOverChanel chan<- bool) {
 
 		resetMoveTimer()
 	}
-}
-
-func (gm *Game) generateFood() {
-	var foodTimer *time.Timer
-
-	resetFoodTimer := func() {
-		foodTimer = time.NewTimer(15 * time.Duration(gm.speed) * time.Millisecond)
-	}
-	resetFoodTimer()
-
-	for {
-		gm.addRandomFood()
-
-		<-foodTimer.C
-		if gm.isOver {
-			break
-		}
-		resetFoodTimer()
-	}
-}
-
-func (gm *Game) printGameOver() {
-	gm.dataField.DrawText("<===GAME OVER===>", sdc.Point{Line: 5, Column: 2})
-}
-
-func (gm *Game) Start() {
-
-	if err := keyboard.Open(); err != nil {
-		panic(err)
-	}
-	defer func() {
-		_ = keyboard.Close()
-	}()
-
-	var gameOverChanel chan bool = make(chan bool)
-	gm.drawBoxes()
-
-	go gm.checkKeyPress()
-	go gm.moveSnake(gameOverChanel)
-	go gm.generateFood()
-	go gm.repaint()
-
-	<-gameOverChanel
-	gm.isOver = true
-
-	time.Sleep(1 * time.Second)
-	gm.printGameOver()
-
 }
