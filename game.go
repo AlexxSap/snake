@@ -20,8 +20,8 @@ type Game struct {
 }
 
 func SnakeGame() *Game {
-	snakeCanvas, _ := sdc.NewCanvas(sdc.Point{Line: 1, Column: 1}, sdc.Point{Line: 20, Column: 30})
-	dataCanvas, _ := sdc.NewCanvas(sdc.Point{Line: 1, Column: 35}, sdc.Point{Line: 10, Column: 20})
+	snakeCanvas, _ := sdc.NewCanvas(sdc.Point{Line: 1, Column: 1}, sdc.Point{Line: 15, Column: 25})
+	dataCanvas, _ := sdc.NewCanvas(sdc.Point{Line: 1, Column: 30}, sdc.Point{Line: 10, Column: 20})
 
 	return &Game{
 		snakeField: snakeCanvas,
@@ -75,13 +75,17 @@ func (gm *Game) repaint() {
 	}
 	resetRepaintTimer()
 
+	prevSpeed := 0
 	for {
 		gm.snakeField.ClearInner()
-		gm.dataField.ClearInner()
 
 		repaintSnake(gm.snakeField, gm.snake)
 		repaintFood(gm.snakeField, gm.food)
-		repaintScore(gm.dataField, gm.snake.Len(), gm.speed)
+		if prevSpeed != gm.speed {
+			gm.dataField.ClearInner()
+			repaintScore(gm.dataField, gm.snake.Len(), gm.speed)
+			prevSpeed = gm.speed
+		}
 
 		if gm.isOver {
 			break
@@ -109,8 +113,9 @@ func repaintFood(cnv sdc.Canvas, food []Point) {
 }
 
 func repaintScore(cnv sdc.Canvas, snakeLen, speed int) {
+
 	cnv.DrawText("Len  : "+strconv.Itoa(snakeLen), sdc.Point{Line: 2, Column: 2})
-	cnv.DrawText("Speed: "+strconv.Itoa(speed), sdc.Point{Line: 3, Column: 2})
+	cnv.DrawText("Speed: "+strconv.Itoa(1000-speed), sdc.Point{Line: 3, Column: 2})
 }
 
 func (gm *Game) isSnakeOutOfBox() bool {
@@ -190,7 +195,7 @@ func (gm *Game) generateFood() {
 	var foodTimer *time.Timer
 
 	resetFoodTimer := func() {
-		foodTimer = time.NewTimer(20 * time.Duration(gm.speed) * time.Millisecond)
+		foodTimer = time.NewTimer(15 * time.Duration(gm.speed) * time.Millisecond)
 	}
 	resetFoodTimer()
 
